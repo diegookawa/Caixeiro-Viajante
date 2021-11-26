@@ -40,16 +40,16 @@ double calcularDistanciaPontos(Ponto p1, Ponto p2);
 //Funcoes para grafos
 Grafo *criarGrafo(int tamanho);
 Grafo *lerArquivo(char nomeArquivo[], int *tam);
+int *buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]);
+int *prim(Grafo *grafo, int vertice);
 void destruirGrafo(Grafo *grafo);
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
-void prim(Grafo *grafo, int vertice);
-void buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]);
-void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[]);
+void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[], int ordemVisita[], int itr);
 void iniciarProdecessores(Grafo *grafo, int prodecessores[]);
 void marcarNaoVisitados(Grafo *grafo, int visitados[]);
 void imprimirGrafo(Grafo *grafo);
 void imprimirPrim(Grafo *grafo, int prodecessoes[]);
-double calcularCustoTotal(Grafo *grafo);
+double calcularCustoTotal(Grafo *grafo, int ordemVisita[]);
 
 //Funcoes para HEAP minimo
 int pai(int i);
@@ -66,7 +66,7 @@ VerticeCusto extrairMinimo(VerticeCusto V[], int *tam);
 int main(int argc, char *argv[]){
 
     Grafo *grafo;
-    int tam;
+    int tam, *prodecessores, *ordemVisita;
 
     grafo = criarGrafo(6);
 
@@ -112,7 +112,12 @@ int main(int argc, char *argv[]){
 
     printf("\n");
 
-    prim(grafo, 0);
+    prodecessores = prim(grafo, 0);
+
+    printf("\nArvore de prodecessores:\n");
+    ordemVisita = buscaProfundidade(grafo, 0, prodecessores);
+
+    printf("Custo total: %lf\n", calcularCustoTotal(grafo, ordemVisita));
 
     destruirGrafo(grafo);
 
@@ -243,11 +248,13 @@ void iniciarProdecessores(Grafo *grafo, int prodecessores[]){
 
 }
 
-void prim(Grafo *grafo, int vertice){
+int *prim(Grafo *grafo, int vertice){
 
-    int prodecessores[grafo->vertices], tamHeap = grafo->vertices;
+    int *prodecessores, tamHeap = grafo->vertices;
     double custos[grafo->vertices];
     VerticeCusto heap[tamHeap];    
+
+    prodecessores = malloc ((grafo->vertices) * sizeof (int));
 
     for(int i = 0; i < tamHeap; i++){
 
@@ -282,8 +289,8 @@ void prim(Grafo *grafo, int vertice){
 
     }
 
-    printf("\nArvore de prodecessores:\n");
-    buscaProfundidade(grafo, 0, prodecessores);
+    return prodecessores;
+
 }
 
 void imprimirPrim(Grafo *grafo, int prodecessoes[]){
@@ -294,19 +301,23 @@ void imprimirPrim(Grafo *grafo, int prodecessoes[]){
 
 }
 
-void buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]){
+int *buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]){
 
-    int visitados[grafo->vertices];
+    int visitados[grafo->vertices], *ordemVisita, itr = 1;
+
+    ordemVisita = malloc ((grafo->vertices + 1) * sizeof (int));
 
     marcarNaoVisitados(grafo, visitados);
     
-    printf("%d -> ", vertice + 1);
-    buscaProfundidadeAuxiliar(grafo, vertice, prodecessores, visitados);
-    printf("%d\n", vertice + 1);
+    ordemVisita[0] = vertice;
+    buscaProfundidadeAuxiliar(grafo, vertice, prodecessores, visitados, ordemVisita, itr);
+    ordemVisita[grafo->vertices] = vertice;
+
+    return ordemVisita;
 
 }
 
-void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[]){
+void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[], int ordemVisita[], int itr){
 
     visitados[vertice] = 1;
 
@@ -314,9 +325,10 @@ void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], i
 
         if(prodecessores[aux->id] == vertice){
 
-            printf("%d -> ", aux->id + 1);
+            ordemVisita[itr] = aux->id;
             visitados[aux->id] = 1;
-            buscaProfundidadeAuxiliar(grafo, aux->id, prodecessores, visitados);
+            itr++;
+            buscaProfundidadeAuxiliar(grafo, aux->id, prodecessores, visitados, ordemVisita, itr);
 
         }
         
@@ -326,9 +338,28 @@ void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], i
 
 }
 
-double calcularCustoTotal(Grafo *grafo){
+double calcularCustoTotal(Grafo *grafo, int ordemVisita[]){
 
-    
+    double custo = 0;
+
+    for(int i = 0; i < grafo->vertices; i++){
+
+        int vertice = ordemVisita[i];
+
+        for(No *aux = grafo->adjacencias[vertice]; aux != NULL; aux = aux->proximo){
+
+            if(ordemVisita[i + 1] == aux->id){
+
+                custo += aux->peso;
+                printf("%lf -> ", aux->peso);
+                
+            }
+
+        }
+
+    }
+
+    return custo;
 
 }
 
