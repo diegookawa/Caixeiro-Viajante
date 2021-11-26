@@ -59,14 +59,15 @@ void atualizarHeapMinimo(VerticeCusto V[], int tam, int i);
 void criarHeapMinimo(VerticeCusto V[], int tam);
 void diminuirValorChave(VerticeCusto V[], int i, double chave);
 void inserirHeapMinimo(VerticeCusto V[], double chave, int *tam);
-VerticeCusto extrairMinimo(VerticeCusto V[], int *tam);
 void imprimirHeap(VerticeCusto V[], int tam);
+VerticeCusto extrairMinimo(VerticeCusto V[], int *tam);
 
 int main(int argc, char *argv[]){
 
     Grafo *grafo;
     int tam;
 
+    /*
     grafo = criarGrafo(6);
 
     adicionarAresta(0, 1, 223, grafo);
@@ -104,12 +105,17 @@ int main(int argc, char *argv[]){
     adicionarAresta(5, 2, 223, grafo);
     adicionarAresta(5, 3, 141, grafo);
     adicionarAresta(5, 4, 100, grafo);
+    */
+
+    grafo = lerArquivo("input.txt", &tam);
 
     imprimirGrafo(grafo);
 
     printf("\n");
 
     prim(grafo, 0);
+
+    destruirGrafo(grafo);
 
     return 0;
 
@@ -154,14 +160,11 @@ Grafo *lerArquivo(char nomeArquivo[], int *tam){
     for(int i = 0; i < (*tam); i++)
         fscanf(arquivo, "%lf %lf", &pontos[i].x, &pontos[i].y);
         
-    for(int i = 0; i < grafo->vertices; i++){
-        
+    for(int i = 0; i < grafo->vertices; i++)
         for(int j = 0; j < grafo->vertices; j++)
             if(i != j)
                 adicionarAresta(i, j, calcularDistanciaPontos(pontos[i], pontos[j]), grafo);
 
-    }
-    
     fclose(arquivo);
 
     return grafo;
@@ -249,14 +252,15 @@ void prim(Grafo *grafo, int vertice){
     for(int i = 0; i < tamHeap; i++){
 
         heap[i].vertice = i;
-        heap[i].custo = 55555;
+        heap[i].custo = DBL_MAX;
         prodecessores[i] = -1;
 
     }
 
     criarHeapMinimo(heap, tamHeap);
     diminuirValorChave(heap, vertice, 0);
-    imprimirHeap(heap, tamHeap);
+
+    printf("Custos: ");
 
     while(tamHeap > 0){
 
@@ -278,6 +282,7 @@ void prim(Grafo *grafo, int vertice){
 
     }
 
+    printf("\nArvore de predecessores:");
     imprimirPrim(grafo, prodecessores);
 
 }
@@ -340,7 +345,6 @@ void criarHeapMinimo(VerticeCusto V[], int tam){
 VerticeCusto extrairMinimo(VerticeCusto V[], int *tam){
 
     VerticeCusto verticeCusto;
-    int min;
 
     if((*tam) < 1)
        printf("Erro: heap underflow");
@@ -407,13 +411,10 @@ double calcularDistanciaPontos(Ponto p1, Ponto p2){
 }
 
 void imprimirHeap(VerticeCusto V[], int tam){
-    int i;
 
-    for (i = 0; i < tam; i++){
-
+    for (int i = 0; i < tam; i++)
         printf("%lf ", V[i].custo);
-        printf("\n");
 
-    }
+    printf("\n");
 
 }
