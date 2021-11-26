@@ -249,13 +249,14 @@ void prim(Grafo *grafo, int vertice){
     for(int i = 0; i < tamHeap; i++){
 
         heap[i].vertice = i;
-        heap[i].custo = DBL_MAX; // BUG, NAO PREENCHE A POSICAO 2
+        heap[i].custo = 55555; // BUG, NAO PREENCHE A POSICAO 2
         prodecessores[i] = -1;
 
     }
 
     criarHeapMinimo(heap, tamHeap);
     diminuirValorChave(heap, vertice, 0);
+    imprimirHeap(heap, tamHeap);
 
     while(tamHeap > 0){
 
@@ -309,7 +310,7 @@ void atualizarHeapMinimo(VerticeCusto V[], int tam, int i){
     else
        menor = i;
 
-    if((esquerda < tam) && (V[direita].custo < V[menor].custo))
+    if((direita < tam) && (V[direita].custo < V[menor].custo))
        menor = direita;
 
     if(menor != i){
@@ -331,7 +332,7 @@ void trocar(VerticeCusto V[], int a, int b){
 
 void criarHeapMinimo(VerticeCusto V[], int tam){
 
-    for(int i = 0; i < tam/2; i++)
+    for(int i = 0; i < tam / 2; i++)
        atualizarHeapMinimo(V, tam, i);
 
 }
