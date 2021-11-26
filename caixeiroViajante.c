@@ -249,7 +249,7 @@ void prim(Grafo *grafo, int vertice){
     for(int i = 0; i < tamHeap; i++){
 
         heap[i].vertice = i;
-        heap[i].custo = 55555; // BUG, NAO PREENCHE A POSICAO 2
+        heap[i].custo = 55555;
         prodecessores[i] = -1;
 
     }
