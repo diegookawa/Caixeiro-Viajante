@@ -49,6 +49,7 @@ void iniciarProdecessores(Grafo *grafo, int prodecessores[]);
 void marcarNaoVisitados(Grafo *grafo, int visitados[]);
 void imprimirGrafo(Grafo *grafo);
 void imprimirPrim(Grafo *grafo, int prodecessoes[]);
+double calcularCustoTotal(Grafo *grafo);
 
 //Funcoes para HEAP minimo
 int pai(int i);
@@ -164,6 +165,7 @@ Grafo *lerArquivo(char nomeArquivo[], int *tam){
                 adicionarAresta(i, j, calcularDistanciaPontos(pontos[i], pontos[j]), grafo);
 
     fclose(arquivo);
+    free(pontos);
 
     return grafo;
 
@@ -324,7 +326,13 @@ void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], i
 
 }
 
-int pai (int i){
+double calcularCustoTotal(Grafo *grafo){
+
+    
+
+}
+
+int pai(int i){
 
     return (i - 1) / 2;
 
