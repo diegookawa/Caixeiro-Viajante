@@ -43,8 +43,8 @@ Grafo *lerArquivo(char nomeArquivo[], int *tam);
 void destruirGrafo(Grafo *grafo);
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
 void prim(Grafo *grafo, int vertice);
-void buscaProfundidade(Grafo *grafo, int visitados[], int *tempo);
-void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[], int **tempos, int *tempo);
+void buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]);
+void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[]);
 void iniciarProdecessores(Grafo *grafo, int prodecessores[]);
 void marcarNaoVisitados(Grafo *grafo, int visitados[]);
 void imprimirGrafo(Grafo *grafo);
@@ -67,7 +67,6 @@ int main(int argc, char *argv[]){
     Grafo *grafo;
     int tam;
 
-    /*
     grafo = criarGrafo(6);
 
     adicionarAresta(0, 1, 223, grafo);
@@ -95,8 +94,8 @@ int main(int argc, char *argv[]){
     adicionarAresta(3, 5, 141, grafo);
 
     adicionarAresta(4, 0, 223, grafo);
-    adicionarAresta(4, 1, 141, grafo);
     adicionarAresta(4, 2, 141, grafo);
+    adicionarAresta(4, 1, 141, grafo);
     adicionarAresta(4, 3, 223, grafo);
     adicionarAresta(4, 5, 100, grafo);
 
@@ -105,9 +104,8 @@ int main(int argc, char *argv[]){
     adicionarAresta(5, 2, 223, grafo);
     adicionarAresta(5, 3, 141, grafo);
     adicionarAresta(5, 4, 100, grafo);
-    */
 
-    grafo = lerArquivo("input.txt", &tam);
+    //grafo = lerArquivo("input.txt", &tam);
 
     imprimirGrafo(grafo);
 
@@ -247,7 +245,7 @@ void prim(Grafo *grafo, int vertice){
 
     int prodecessores[grafo->vertices], tamHeap = grafo->vertices;
     double custos[grafo->vertices];
-    VerticeCusto heap[tamHeap];
+    VerticeCusto heap[tamHeap];    
 
     for(int i = 0; i < tamHeap; i++){
 
@@ -282,9 +280,8 @@ void prim(Grafo *grafo, int vertice){
 
     }
 
-    printf("\nArvore de predecessores:");
-    imprimirPrim(grafo, prodecessores);
-
+    printf("\nArvore de prodecessores:\n");
+    buscaProfundidade(grafo, 0, prodecessores);
 }
 
 void imprimirPrim(Grafo *grafo, int prodecessoes[]){
@@ -295,7 +292,37 @@ void imprimirPrim(Grafo *grafo, int prodecessoes[]){
 
 }
 
-//Funcoes para HEAP minimo
+void buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]){
+
+    int visitados[grafo->vertices];
+
+    marcarNaoVisitados(grafo, visitados);
+    
+    printf("%d -> ", vertice + 1);
+    buscaProfundidadeAuxiliar(grafo, vertice, prodecessores, visitados);
+    printf("%d\n", vertice + 1);
+
+}
+
+void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[]){
+
+    visitados[vertice] = 1;
+
+    for(No *aux = grafo->adjacencias[vertice]; aux != NULL; aux = aux->proximo){
+
+        if(prodecessores[aux->id] == vertice){
+
+            printf("%d -> ", aux->id + 1);
+            visitados[aux->id] = 1;
+            buscaProfundidadeAuxiliar(grafo, aux->id, prodecessores, visitados);
+
+        }
+        
+    }
+
+    visitados[vertice] = 2;
+
+}
 
 int pai (int i){
 
