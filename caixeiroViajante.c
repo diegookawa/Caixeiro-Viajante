@@ -6,7 +6,7 @@
 typedef struct no {
 
     int id;
-    int peso;
+    double peso;
     struct no *proximo;
     
 } No;
@@ -38,13 +38,15 @@ double calcularDistanciaPontos(Ponto p1, Ponto p2);
 
 //Funcoes para grafos
 Grafo *criarGrafo(int tamanho);
+Grafo *lerArquivo(char nomeArquivo[], int *tam);
 void destruirGrafo(Grafo *grafo);
-void adicionarAresta(int v1, int v2, int peso, Grafo *grafo);
+void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
 void prim(Grafo *grafo, int vertice);
 void buscaProfundidade(Grafo *grafo, int visitados[], int *tempo);
 void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[], int **tempos, int *tempo);
 void iniciarProdecessores(Grafo *grafo, int prodecessores[]);
 void marcarNaoVisitados(Grafo *grafo, int visitados[]);
+void imprimirGrafo(Grafo *grafo);
 
 //Funcoes para HEAP minimo
 int pai(int i);
@@ -58,6 +60,13 @@ void inserirHeapMinimo(VerticeCusto V[], int chave, int *size);
 VerticeCusto extrairMinimo(VerticeCusto V[], int *size);
 
 int main(int argc, char *argv[]){
+
+    Grafo *grafo;
+    int tam;
+
+    grafo = lerArquivo("input.txt", &tam);
+
+    imprimirGrafo(grafo);
 
     return 0;
 
@@ -78,6 +87,44 @@ Grafo *criarGrafo(int tamanho){
 
 }
 
+Grafo *lerArquivo(char nomeArquivo[], int *tam){
+
+    FILE *arquivo;
+    Grafo *grafo;
+    Ponto *pontos;
+
+    arquivo = fopen(nomeArquivo, "r");
+
+    if(arquivo == NULL){
+
+        printf("ERRO AO ABRIR O ARQUIVO.");
+        getchar();
+        exit(1);
+
+    }
+
+    fscanf(arquivo, "%d", tam);
+
+    grafo = criarGrafo(*tam);
+    pontos = (Ponto*) malloc ((*tam) * sizeof (Ponto));
+    
+    for(int i = 0; i < (*tam); i++)
+        fscanf(arquivo, "%lf %lf", &pontos[i].x, &pontos[i].y);
+        
+    for(int i = 0; i < grafo->vertices; i++){
+        
+        for(int j = 0; j < grafo->vertices; j++)
+            if(i != j)
+                adicionarAresta(i, j, calcularDistanciaPontos(pontos[i], pontos[j]), grafo);
+
+    }
+    
+    fclose(arquivo);
+
+    return grafo;
+
+}
+
 void destruirGrafo(Grafo *grafo){
 
     for(int i = 0; i < grafo->vertices; i++)
@@ -89,7 +136,22 @@ void destruirGrafo(Grafo *grafo){
 
 }
 
-void adicionarAresta(int v1, int v2, int peso, Grafo *grafo){
+void imprimirGrafo(Grafo *grafo){
+
+    for(int i = 0; i < grafo->vertices; i++){
+
+        printf("%d -> ", i);
+
+        for(No *aux = grafo->adjacencias[i]; aux != NULL; aux = aux->proximo)
+            printf("%d (peso: %lf) ", aux->id, aux->peso);
+
+        printf("\n");
+
+    }
+    
+}
+
+void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
     No *ultimo = NULL;
 
@@ -135,7 +197,7 @@ void iniciarProdecessores(Grafo *grafo, int prodecessores[]){
 
 }
 
-int pai (int i) {
+int pai (int i){
 
     return (i - 1) / 2;
 
