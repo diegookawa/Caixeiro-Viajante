@@ -46,7 +46,6 @@ int *prim(Grafo *grafo, int vertice);
 void destruirGrafo(Grafo *grafo);
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
 void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int ordemVisita[], int itr);
-void marcarNaoVisitados(Grafo *grafo, int visitados[]);
 void imprimirGrafo(Grafo *grafo);
 void imprimirPrim(Grafo *grafo, int prodecessoes[]);
 double calcularCustoTotal(Ponto pontos[], int ordemVisita[], int tam);
@@ -247,13 +246,6 @@ void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
 }
 
-void marcarNaoVisitados(Grafo *grafo, int visitados[]){
-
-    for(int i = 0; i < grafo->vertices; i++)
-        visitados[i] = 0;
-
-}
-
 int *prim(Grafo *grafo, int vertice){
 
     int *prodecessores, tamHeap = grafo->vertices;
@@ -337,11 +329,8 @@ double calcularCustoTotal(Ponto pontos[], int ordemVisita[], int tam){
 
     double custoTotal = 0;
 
-    for(int i = 0; i < tam; i++){
-
+    for(int i = 0; i < tam; i++)
         custoTotal += calcularDistanciaPontos(pontos[ordemVisita[i]], pontos[ordemVisita[i + 1]]);
-
-    }
 
     custoTotal += calcularDistanciaPontos(pontos[ordemVisita[(tam - 1)]], pontos[ordemVisita[0]]);
 
@@ -404,6 +393,7 @@ VerticeCusto extrairMinimo(VerticeCusto V[], int *tam){
     verticeCusto = V[0];
     V[0] = V[(*tam) - 1];
     (*tam)--;
+
     atualizarHeapMinimo(V, *tam, 0);
 
     return verticeCusto;
@@ -420,6 +410,7 @@ void diminuirValorChave(VerticeCusto V[], int i, double chave){
     }
 
     V[i].custo = chave;
+
     while(i > 0 && V[pai(i)].custo > V[i].custo){
 
        trocar(V, i, pai(i));
@@ -433,6 +424,7 @@ void inserirHeapMinimo(VerticeCusto V[], double chave, int *tam){
 
     (*tam)++;
     V[(*tam) - 1].custo = INT_MAX;
+
     diminuirValorChave(V, (*tam) - 1, chave);
 
 }
