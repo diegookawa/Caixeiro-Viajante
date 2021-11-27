@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <math.h>
 #include <float.h>
+#include <math.h>
 
 typedef struct no {
 
@@ -38,17 +38,18 @@ typedef struct ponto {
 double calcularDistanciaPontos(Ponto p1, Ponto p2);
 
 //Funcoes para grafos
+int *buscaProfundidade(Grafo *agm, int vertice);
+Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]);
+void destruirGrafo(Grafo *grafo);
+void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
+void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int itr, int visitados[]);
+void imprimirGrafo(Grafo *grafo);
+void imprimirPrim(Grafo *grafo, int prodecessoes[]);
+void exportarAGM(Grafo *agm, Ponto pontos[]);
+double calcularCustoTotal(Ponto pontos[], int ciclo[], int tam);
 Grafo *criarGrafo(int tamanho);
 Grafo *preencherGrafo(Ponto pontos[], int tam);
 Ponto *lerArquivo(char nomeArquivo[], int *tam);
-int *buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]);
-int *prim(Grafo *grafo, int vertice);
-void destruirGrafo(Grafo *grafo);
-void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
-void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int ordemVisita[], int itr);
-void imprimirGrafo(Grafo *grafo);
-void imprimirPrim(Grafo *grafo, int prodecessoes[]);
-double calcularCustoTotal(Ponto pontos[], int ordemVisita[], int tam);
 
 //Funcoes para HEAP minimo
 int pai(int i);
@@ -64,9 +65,9 @@ VerticeCusto extrairMinimo(VerticeCusto V[], int *tam);
 
 int main(int argc, char *argv[]){
 
-    Grafo *grafo;
+    Grafo *grafo, *agm;
     Ponto *pontos;
-    int tam, *prodecessores, *ordemVisita;
+    int tam, *ciclo;
 
     /*
     grafo = criarGrafo(6);
@@ -106,8 +107,8 @@ int main(int argc, char *argv[]){
     adicionarAresta(5, 2, 223, grafo);
     adicionarAresta(5, 3, 141, grafo);
     adicionarAresta(5, 4, 100, grafo);
-    */
 
+    */
     pontos = lerArquivo("input.txt", &tam);
     grafo = preencherGrafo(pontos, tam);
     
@@ -115,16 +116,15 @@ int main(int argc, char *argv[]){
 
     //printf("\n");
 
-    prodecessores = prim(grafo, 0);
+    agm = prim(grafo, 0, pontos);
+    ciclo = buscaProfundidade(agm, 0);
 
-    ordemVisita = buscaProfundidade(grafo, 0, prodecessores);
+    printf("Custo total: %lf\n", calcularCustoTotal(pontos, ciclo, tam));
 
-    printf("Custo total: %lf\n", calcularCustoTotal(pontos, ordemVisita, tam));
-
-    free(prodecessores);
-    free(ordemVisita);
+    free(ciclo);
     free(pontos);
     destruirGrafo(grafo);
+    destruirGrafo(agm);
 
     return 0;
 
@@ -206,7 +206,7 @@ void imprimirGrafo(Grafo *grafo){
         printf("%d -> ", i);
 
         for(No *aux = grafo->adjacencias[i]; aux != NULL; aux = aux->proximo)
-            printf("%d (peso: %lf) ", aux->id, aux->peso);
+            printf("%d (peso: %lf), ", aux->id, aux->peso);
 
         printf("\n");
 
@@ -246,22 +246,25 @@ void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
 }
 
-int *prim(Grafo *grafo, int vertice){
+Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
-    int *prodecessores, tamHeap = grafo->vertices;
+    int prodecessores[grafo->vertices], tamHeap = grafo->vertices;
     double custos[grafo->vertices];
-    VerticeCusto heap[tamHeap];    
+    VerticeCusto heap[tamHeap];
+    Grafo *agm;
 
-    prodecessores = malloc ((grafo->vertices) * sizeof (int));
+    agm = criarGrafo(grafo->vertices);    
 
     for(int i = 0; i < tamHeap; i++){
 
+        custos[i] = DBL_MAX;
         heap[i].vertice = i;
-        heap[i].custo = DBL_MAX;
+        heap[i].custo = custos[i];
         prodecessores[i] = -1;
 
     }
 
+    custos[0] = 0;
     criarHeapMinimo(heap, tamHeap);
     diminuirValorChave(heap, vertice, 0);
 
@@ -271,9 +274,10 @@ int *prim(Grafo *grafo, int vertice){
 
         for(No *aux = grafo->adjacencias[u.vertice]; aux != NULL; aux = aux->proximo){
 
-            if(existe(heap, aux->id, tamHeap) && aux->peso < heap[retornarPosicao(heap, aux->id, tamHeap)].custo){
+            if(existe(heap, aux->id, tamHeap) && aux->peso < custos[aux->id]){
                 
                 int posicao = retornarPosicao(heap, aux->id, tamHeap);
+                custos[aux->id] = aux->peso;
                 prodecessores[aux->id] = u.vertice;
                 diminuirValorChave(heap, posicao, aux->peso);
 
@@ -283,7 +287,16 @@ int *prim(Grafo *grafo, int vertice){
 
     }
 
-    return prodecessores;
+    for(int i = 1; i < grafo->vertices; i++){
+
+        adicionarAresta(i, prodecessores[i], 0, agm);
+        adicionarAresta(prodecessores[i], i, 0, agm);
+
+    }
+
+    exportarAGM(agm, pontos);
+
+    return agm;
 
 }
 
@@ -295,29 +308,34 @@ void imprimirPrim(Grafo *grafo, int prodecessoes[]){
 
 }
 
-int *buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]){
+int *buscaProfundidade(Grafo *agm, int vertice){
 
-    int *ordemVisita, itr = 1;
+    int *ciclo, itr = 1, visitados[agm->vertices];
 
-    ordemVisita = malloc ((grafo->vertices + 1) * sizeof (int));
+    ciclo = malloc ((agm->vertices + 1) * sizeof (int));
+
+    for(int i = 0; i < agm->vertices; i++)
+        visitados[i] = 0;
     
-    ordemVisita[0] = vertice;
-    buscaProfundidadeAuxiliar(grafo, vertice, prodecessores, ordemVisita, itr);
-    ordemVisita[grafo->vertices] = vertice;
+    ciclo[0] = vertice;
+    buscaProfundidadeAuxiliar(agm, vertice, ciclo, itr, visitados);
+    ciclo[agm->vertices] = vertice;
 
-    return ordemVisita;
+    return ciclo;
 
 }
 
-void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int ordemVisita[], int itr){
+void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int itr, int visitados[]){
 
-    for(No *aux = grafo->adjacencias[vertice]; aux != NULL; aux = aux->proximo){
+    visitados[vertice] = 1;
 
-        if(prodecessores[aux->id] == vertice){
+    for(No *aux = agm->adjacencias[vertice]; aux != NULL; aux = aux->proximo){
 
-            ordemVisita[itr] = aux->id;
+        if(visitados[aux->id] == 0){
+
+            ciclo[itr] = aux->id;
             itr++;
-            buscaProfundidadeAuxiliar(grafo, aux->id, prodecessores, ordemVisita, itr);
+            buscaProfundidadeAuxiliar(agm, aux->id, ciclo, itr, visitados);
 
         }
         
@@ -325,16 +343,44 @@ void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], i
 
 }
 
-double calcularCustoTotal(Ponto pontos[], int ordemVisita[], int tam){
+double calcularCustoTotal(Ponto pontos[], int ciclo[], int tam){
 
     double custoTotal = 0;
 
     for(int i = 0; i < tam; i++)
-        custoTotal += calcularDistanciaPontos(pontos[ordemVisita[i]], pontos[ordemVisita[i + 1]]);
+        custoTotal += calcularDistanciaPontos(pontos[ciclo[i]], pontos[ciclo[i + 1]]);
 
-    custoTotal += calcularDistanciaPontos(pontos[ordemVisita[(tam - 1)]], pontos[ordemVisita[0]]);
+    custoTotal += calcularDistanciaPontos(pontos[ciclo[(tam - 1)]], pontos[ciclo[0]]);
 
     return custoTotal;
+
+}
+
+void exportarAGM(Grafo *agm, Ponto pontos[]){
+
+    FILE *arquivo;
+
+    arquivo = fopen("tree.txt", "w");
+
+    if(arquivo == NULL){
+
+        printf("ERRO AO ABRIR O ARQUIVO.");
+        getchar();
+        exit(1);
+
+    }
+
+    for(int i = 0; i < agm->vertices; i++){
+
+        for(No *aux = agm->adjacencias[i]; aux != NULL; aux = aux->proximo){
+
+            fprintf(arquivo, "%d %d\n%d %d\n\n", (int) pontos[i].x, (int) pontos[i].y, (int) pontos[aux->id].x, (int) pontos[aux->id].y);
+
+        }
+
+    }
+
+    fclose(arquivo);
 
 }
 
