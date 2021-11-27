@@ -45,8 +45,7 @@ int *buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]);
 int *prim(Grafo *grafo, int vertice);
 void destruirGrafo(Grafo *grafo);
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
-void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[], int ordemVisita[], int itr);
-void iniciarProdecessores(Grafo *grafo, int prodecessores[]);
+void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int ordemVisita[], int itr);
 void marcarNaoVisitados(Grafo *grafo, int visitados[]);
 void imprimirGrafo(Grafo *grafo);
 void imprimirPrim(Grafo *grafo, int prodecessoes[]);
@@ -108,7 +107,6 @@ int main(int argc, char *argv[]){
     adicionarAresta(5, 2, 223, grafo);
     adicionarAresta(5, 3, 141, grafo);
     adicionarAresta(5, 4, 100, grafo);
-
     */
 
     pontos = lerArquivo("input.txt", &tam);
@@ -256,13 +254,6 @@ void marcarNaoVisitados(Grafo *grafo, int visitados[]){
 
 }
 
-void iniciarProdecessores(Grafo *grafo, int prodecessores[]){
-
-    for(int i = 0; i < grafo->vertices; i++)
-        prodecessores[i] = -1;
-
-}
-
 int *prim(Grafo *grafo, int vertice){
 
     int *prodecessores, tamHeap = grafo->vertices;
@@ -314,38 +305,31 @@ void imprimirPrim(Grafo *grafo, int prodecessoes[]){
 
 int *buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]){
 
-    int visitados[grafo->vertices], *ordemVisita, itr = 1;
+    int *ordemVisita, itr = 1;
 
     ordemVisita = malloc ((grafo->vertices + 1) * sizeof (int));
-
-    marcarNaoVisitados(grafo, visitados);
     
     ordemVisita[0] = vertice;
-    buscaProfundidadeAuxiliar(grafo, vertice, prodecessores, visitados, ordemVisita, itr);
+    buscaProfundidadeAuxiliar(grafo, vertice, prodecessores, ordemVisita, itr);
     ordemVisita[grafo->vertices] = vertice;
 
     return ordemVisita;
 
 }
 
-void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int visitados[], int ordemVisita[], int itr){
-
-    visitados[vertice] = 1;
+void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], int ordemVisita[], int itr){
 
     for(No *aux = grafo->adjacencias[vertice]; aux != NULL; aux = aux->proximo){
 
         if(prodecessores[aux->id] == vertice){
 
             ordemVisita[itr] = aux->id;
-            visitados[aux->id] = 1;
             itr++;
-            buscaProfundidadeAuxiliar(grafo, aux->id, prodecessores, visitados, ordemVisita, itr);
+            buscaProfundidadeAuxiliar(grafo, aux->id, prodecessores, ordemVisita, itr);
 
         }
         
     }
-
-    visitados[vertice] = 2;
 
 }
 
