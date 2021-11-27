@@ -126,6 +126,7 @@ int main(int argc, char *argv[]){
 
     free(prodecessores);
     free(ordemVisita);
+    free(pontos);
     destruirGrafo(grafo);
 
     return 0;
@@ -193,8 +194,8 @@ Grafo *preencherGrafo(Ponto pontos[], int tam){
 void destruirGrafo(Grafo *grafo){
 
     for(int i = 0; i < grafo->vertices; i++)
-        if(grafo->adjacencias[i] != NULL)
-            free(grafo->adjacencias[i]);
+        for(No *aux = grafo->adjacencias[i]; aux != NULL; aux = aux->proximo)
+            free(aux);
 
     free(grafo->adjacencias);
     free(grafo);
