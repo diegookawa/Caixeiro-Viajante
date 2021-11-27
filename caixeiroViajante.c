@@ -293,6 +293,13 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
     }
 
+    double custoAGM = 0;
+
+    for(int i = 0; i < agm->vertices; i++)
+        custoAGM += custos[i];
+
+    printf("Custo agm: %lf\n", custoAGM);
+
     exportarAGM(agm, pontos);
 
     return agm;
