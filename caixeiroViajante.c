@@ -41,7 +41,7 @@ double calcularDistanciaPontos(Ponto p1, Ponto p2);
 int *buscaProfundidade(Grafo *agm, int vertice);
 void destruirGrafo(Grafo *grafo);
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
-void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int itr, int visitados[]);
+void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int *itr, int visitados[]);
 void imprimirGrafo(Grafo *grafo);
 void exportarAGM(Grafo *agm, Ponto pontos[]);
 double calcularCustoTotal(Ponto pontos[], int ciclo[], int tam);
@@ -67,6 +67,7 @@ int main(int argc, char *argv[]){
     Ponto *pontos;
     int tam, *ciclo;
 
+    /*
     grafo = criarGrafo(6);
 
     adicionarAresta(0, 1, 223, grafo);
@@ -104,22 +105,23 @@ int main(int argc, char *argv[]){
     adicionarAresta(5, 2, 223, grafo);
     adicionarAresta(5, 3, 141, grafo);
     adicionarAresta(5, 4, 100, grafo);
+    */
 
-    //pontos = lerArquivo("input.txt", &tam);
-    //grafo = preencherGrafo(pontos, tam);
+    pontos = lerArquivo("input.txt", &tam);
+    grafo = preencherGrafo(pontos, tam);
     
-    printf("Grafo completo: \n");
-    imprimirGrafo(grafo);
+    //printf("Grafo completo: \n");
+    //imprimirGrafo(grafo);
 
     //printf("\n");
 
     agm = prim(grafo, 0, pontos);
     ciclo = buscaProfundidade(agm, 0);
 
-    //printf("Custo total: %lf\n", calcularCustoTotal(pontos, ciclo, tam));
+    printf("Custo total: %lf\n", calcularCustoTotal(pontos, ciclo, tam));
 
     free(ciclo);
-    //free(pontos);
+    free(pontos);
     destruirGrafo(grafo);
     destruirGrafo(agm);
 
@@ -291,10 +293,7 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
     }
 
-    printf("\nArvore geradora minima: \n");
-    imprimirGrafo(agm);
-
-    //exportarAGM(agm, pontos);
+    exportarAGM(agm, pontos);
 
     return agm;
 
@@ -310,18 +309,14 @@ int *buscaProfundidade(Grafo *agm, int vertice){
         visitados[i] = 0;
     
     ciclo[0] = vertice;
-    buscaProfundidadeAuxiliar(agm, vertice, ciclo, itr, visitados);
+    buscaProfundidadeAuxiliar(agm, vertice, ciclo, &itr, visitados);
     ciclo[agm->vertices] = vertice;
-
-    printf("\nCiclo gerado: \n");
-    for(int i = 0; i <= agm->vertices; i++)
-        printf("%d ", ciclo[i] + 1);
 
     return ciclo;
 
 }
 
-void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int itr, int visitados[]){
+void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int *itr, int visitados[]){
 
     visitados[vertice] = 1;
 
@@ -329,8 +324,8 @@ void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int itr, in
 
         if(visitados[aux->id] == 0){
 
-            ciclo[itr] = aux->id;
-            itr++;
+            ciclo[(*itr)] = aux->id;
+            (*itr)++;
             buscaProfundidadeAuxiliar(agm, aux->id, ciclo, itr, visitados);
 
         }
