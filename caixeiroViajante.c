@@ -286,8 +286,8 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
     for(int i = 1; i < grafo->vertices; i++){
 
-        adicionarAresta(prodecessores[i], i, 0, agm);
-        adicionarAresta(i, prodecessores[i], 0, agm);
+        adicionarAresta(prodecessores[i], i, custos[i], agm);
+        adicionarAresta(i, prodecessores[i], custos[i], agm);
 
     }
 
