@@ -39,7 +39,8 @@ double calcularDistanciaPontos(Ponto p1, Ponto p2);
 
 //Funcoes para grafos
 Grafo *criarGrafo(int tamanho);
-Grafo *lerArquivo(char nomeArquivo[], int *tam);
+Grafo *preencherGrafo(Ponto pontos[], int tam);
+Ponto *lerArquivo(char nomeArquivo[], int *tam);
 int *buscaProfundidade(Grafo *grafo, int vertice, int prodecessores[]);
 int *prim(Grafo *grafo, int vertice);
 void destruirGrafo(Grafo *grafo);
@@ -49,7 +50,7 @@ void iniciarProdecessores(Grafo *grafo, int prodecessores[]);
 void marcarNaoVisitados(Grafo *grafo, int visitados[]);
 void imprimirGrafo(Grafo *grafo);
 void imprimirPrim(Grafo *grafo, int prodecessoes[]);
-double calcularCustoTotal(Grafo *grafo, int ordemVisita[]);
+double calcularCustoTotal(Ponto pontos[], int ordemVisita[], int tam);
 
 //Funcoes para HEAP minimo
 int pai(int i);
@@ -66,8 +67,10 @@ VerticeCusto extrairMinimo(VerticeCusto V[], int *tam);
 int main(int argc, char *argv[]){
 
     Grafo *grafo;
+    Ponto *pontos;
     int tam, *prodecessores, *ordemVisita;
 
+    /*
     grafo = criarGrafo(6);
 
     adicionarAresta(0, 1, 223, grafo);
@@ -106,22 +109,54 @@ int main(int argc, char *argv[]){
     adicionarAresta(5, 3, 141, grafo);
     adicionarAresta(5, 4, 100, grafo);
 
-    //grafo = lerArquivo("input.txt", &tam);
+    */
 
-    imprimirGrafo(grafo);
+    pontos = lerArquivo("input.txt", &tam);
+    grafo = preencherGrafo(pontos, tam);
+    
+    //imprimirGrafo(grafo);
 
-    printf("\n");
+    //printf("\n");
 
     prodecessores = prim(grafo, 0);
 
-    printf("\nArvore de prodecessores:\n");
     ordemVisita = buscaProfundidade(grafo, 0, prodecessores);
 
-    printf("Custo total: %lf\n", calcularCustoTotal(grafo, ordemVisita));
+    printf("Custo total: %lf\n", calcularCustoTotal(pontos, ordemVisita, tam));
 
+    free(prodecessores);
+    free(ordemVisita);
     destruirGrafo(grafo);
 
     return 0;
+
+}
+
+Ponto *lerArquivo(char nomeArquivo[], int *tam){
+
+    FILE *arquivo;
+    Ponto *pontos;
+
+    arquivo = fopen(nomeArquivo, "r");
+
+    if(arquivo == NULL){
+
+        printf("ERRO AO ABRIR O ARQUIVO.");
+        getchar();
+        exit(1);
+
+    }
+
+    fscanf(arquivo, "%d", tam);
+
+    pontos = (Ponto*) malloc ((*tam) * sizeof (Ponto));
+
+    for(int i = 0; i < (*tam); i++)
+        fscanf(arquivo, "%lf %lf", &pontos[i].x, &pontos[i].y);
+
+    fclose(arquivo);
+
+    return pontos;
 
 }
 
@@ -140,37 +175,16 @@ Grafo *criarGrafo(int tamanho){
 
 }
 
-Grafo *lerArquivo(char nomeArquivo[], int *tam){
+Grafo *preencherGrafo(Ponto pontos[], int tam){
 
-    FILE *arquivo;
     Grafo *grafo;
-    Ponto *pontos;
 
-    arquivo = fopen(nomeArquivo, "r");
-
-    if(arquivo == NULL){
-
-        printf("ERRO AO ABRIR O ARQUIVO.");
-        getchar();
-        exit(1);
-
-    }
-
-    fscanf(arquivo, "%d", tam);
-
-    grafo = criarGrafo(*tam);
-    pontos = (Ponto*) malloc ((*tam) * sizeof (Ponto));
-    
-    for(int i = 0; i < (*tam); i++)
-        fscanf(arquivo, "%lf %lf", &pontos[i].x, &pontos[i].y);
+    grafo = criarGrafo(tam);
         
     for(int i = 0; i < grafo->vertices; i++)
         for(int j = 0; j < grafo->vertices; j++)
             if(i != j)
                 adicionarAresta(i, j, calcularDistanciaPontos(pontos[i], pontos[j]), grafo);
-
-    fclose(arquivo);
-    free(pontos);
 
     return grafo;
 
@@ -267,8 +281,6 @@ int *prim(Grafo *grafo, int vertice){
     criarHeapMinimo(heap, tamHeap);
     diminuirValorChave(heap, vertice, 0);
 
-    printf("Custos: ");
-
     while(tamHeap > 0){
 
         VerticeCusto u = extrairMinimo(heap, &tamHeap);
@@ -284,8 +296,6 @@ int *prim(Grafo *grafo, int vertice){
             }
 
         }
-
-        printf("%lf ", u.custo);
 
     }
 
@@ -338,28 +348,19 @@ void buscaProfundidadeAuxiliar(Grafo *grafo, int vertice, int prodecessores[], i
 
 }
 
-double calcularCustoTotal(Grafo *grafo, int ordemVisita[]){
+double calcularCustoTotal(Ponto pontos[], int ordemVisita[], int tam){
 
-    double custo = 0;
+    double custoTotal = 0;
 
-    for(int i = 0; i < grafo->vertices; i++){
+    for(int i = 0; i < tam; i++){
 
-        int vertice = ordemVisita[i];
-
-        for(No *aux = grafo->adjacencias[vertice]; aux != NULL; aux = aux->proximo){
-
-            if(ordemVisita[i + 1] == aux->id){
-
-                custo += aux->peso;
-                printf("%lf -> ", aux->peso);
-                
-            }
-
-        }
+        custoTotal += calcularDistanciaPontos(pontos[ordemVisita[i]], pontos[ordemVisita[i + 1]]);
 
     }
 
-    return custo;
+    custoTotal += calcularDistanciaPontos(pontos[ordemVisita[(tam - 1)]], pontos[ordemVisita[0]]);
+
+    return custoTotal;
 
 }
 
