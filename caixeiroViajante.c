@@ -132,10 +132,10 @@ int main(int argc, char *argv[]){
     agm = prim(grafo, 0, pontos);
     ciclo = buscaProfundidade(agm, 0);
 
-    printf("%.6f %.6f", (clock() - inicio)/(double)CLOCKS_PER_SEC, calcularCustoTotal(pontos, ciclo, agm->vertices));
-
     exportarAGM(agm, pontos);
     exportarCiclo(ciclo, pontos, tam);
+
+    printf("%.6f %.6f", (clock() - inicio)/(double)CLOCKS_PER_SEC, calcularCustoTotal(pontos, ciclo, agm->vertices));
 
     free(ciclo);
     free(pontos);
