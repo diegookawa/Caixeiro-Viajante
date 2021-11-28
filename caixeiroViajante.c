@@ -27,6 +27,15 @@ typedef struct verticeCusto {
 
 } VerticeCusto;
 
+typedef struct heapMinimo {
+
+    int tamanhoTotal;
+    int numeroVertices;
+    int *posicoes;
+    VerticeCusto **valores;
+
+} HeapMinimo;
+
 typedef struct ponto {
     
     double x;
@@ -51,15 +60,15 @@ Grafo *criarGrafo(int tamanho);
 Grafo *preencherGrafo(Ponto pontos[], int tam);
 
 //Funcoes para HEAP minimo
-int pai(int i);
-int existe(VerticeCusto V[], int vertice, int tam);
-int retornarPosicao(VerticeCusto V[], int vertice, int tam);
-void trocar(VerticeCusto V[], int a, int b);
-void atualizarHeapMinimo(VerticeCusto V[], int tam, int i);
-void criarHeapMinimo(VerticeCusto V[], int tam);
-void diminuirValorChave(VerticeCusto V[], int i, double chave);
+int existe(HeapMinimo *heapMinimo, int vertice);
+void trocar(VerticeCusto **v1, VerticeCusto **v2);
+void atualizarHeapMinimo(HeapMinimo *heapMinimo, int i);
+void diminuirValorCusto(HeapMinimo *heapMinimo, int vertice, int custo);
 void inserirHeapMinimo(VerticeCusto V[], double chave, int *tam);
-VerticeCusto extrairMinimo(VerticeCusto V[], int *tam);
+VerticeCusto *extrairMinimo(HeapMinimo *heapMinimo);
+VerticeCusto *adicionarVerticeHeap(int vertice, double custo);
+HeapMinimo *criarHeapMinimo(int tam);
+int vazio(HeapMinimo *heapMinimo);
 
 int main(int argc, char *argv[]){
 
@@ -237,38 +246,41 @@ void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
 Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
-    int prodecessores[grafo->vertices], tamHeap = grafo->vertices;
+    int prodecessores[grafo->vertices];
     double custos[grafo->vertices];
-    VerticeCusto heap[tamHeap];
+    HeapMinimo *heapMinimo;
     Grafo *agm;
+
+    heapMinimo = criarHeapMinimo(grafo->vertices);
 
     agm = criarGrafo(grafo->vertices);    
 
-    for(int i = 0; i < tamHeap; i++){
+    for(int i = 1; i < grafo->vertices; i++){
 
         custos[i] = DBL_MAX;
-        heap[i].vertice = i;
-        heap[i].custo = custos[i];
+        heapMinimo->valores[i] = adicionarVerticeHeap(i, custos[i]);
+        heapMinimo->posicoes[i] = i;
         prodecessores[i] = -1;
 
     }
 
     custos[0] = 0;
-    criarHeapMinimo(heap, tamHeap);
-    diminuirValorChave(heap, vertice, 0);
+    heapMinimo->valores[0] = adicionarVerticeHeap(0, custos[0]);
+    heapMinimo->posicoes[0] = 0;
 
-    while(tamHeap > 0){
+    heapMinimo->numeroVertices = grafo->vertices;
 
-        VerticeCusto u = extrairMinimo(heap, &tamHeap);
+    while(!vazio(heapMinimo)){
 
-        for(No *aux = grafo->adjacencias[u.vertice]; aux != NULL; aux = aux->proximo){
+        VerticeCusto *u = extrairMinimo(heapMinimo);
 
-            if(existe(heap, aux->id, tamHeap) && aux->peso < custos[aux->id]){
+        for(No *aux = grafo->adjacencias[u->vertice]; aux != NULL; aux = aux->proximo){
+
+            if(existe(heapMinimo, aux->id) && aux->peso < custos[aux->id]){
                 
-                int posicao = retornarPosicao(heap, aux->id, tamHeap);
                 custos[aux->id] = aux->peso;
-                prodecessores[aux->id] = u.vertice;
-                diminuirValorChave(heap, posicao, aux->peso);
+                prodecessores[aux->id] = u->vertice;
+                diminuirValorCusto(heapMinimo, aux->id, custos[aux->id]);
 
             }
 
@@ -374,118 +386,117 @@ void exportarAGM(Grafo *agm, Ponto pontos[]){
 
 }
 
-int pai(int i){
+double calcularDistanciaPontos(Ponto p1, Ponto p2){
 
-    return (i - 1) / 2;
-
-}
-
-void atualizarHeapMinimo(VerticeCusto V[], int tam, int i){
-
-    int esquerda = (i * 2) + 1;
-    int direita = (i * 2) + 2;
-    int menor;
-
-    if((esquerda < tam) && (V[esquerda].custo < V[i].custo))   
-       menor = esquerda;
-   
-    else
-       menor = i;
-
-    if((direita < tam) && (V[direita].custo < V[menor].custo))
-       menor = direita;
-
-    if(menor != i){
-
-       trocar(V, i, menor);
-       atualizarHeapMinimo(V, tam, menor);
-
-    }
+    return sqrt(pow((p1.x - p2.x) , 2) + pow((p1.y - p2.y), 2));
 
 }
 
-void trocar(VerticeCusto V[], int a, int b){
+HeapMinimo *criarHeapMinimo(int tam){
 
-    VerticeCusto aux = V[a];
-    V[a] = V[b];
-    V[b] = aux;
+    HeapMinimo *heapMinimo = (HeapMinimo *) malloc (sizeof (HeapMinimo));
 
-}
+    heapMinimo->posicoes = (int *) malloc (tam * sizeof (int));
+    heapMinimo->numeroVertices = 0;
+    heapMinimo->tamanhoTotal = tam;
+    heapMinimo->valores = (VerticeCusto **) malloc (tam * sizeof (VerticeCusto *));
 
-void criarHeapMinimo(VerticeCusto V[], int tam){
-
-    for(int i = 0; i < tam / 2; i++)
-       atualizarHeapMinimo(V, tam, i);
+    return heapMinimo;
 
 }
 
-VerticeCusto extrairMinimo(VerticeCusto V[], int *tam){
+VerticeCusto *adicionarVerticeHeap(int vertice, double custo){
 
-    VerticeCusto verticeCusto;
-
-    if((*tam) < 1)
-       printf("Erro: heap underflow");
-
-    verticeCusto = V[0];
-    V[0] = V[(*tam) - 1];
-    (*tam)--;
-
-    atualizarHeapMinimo(V, *tam, 0);
+    VerticeCusto *verticeCusto = (VerticeCusto *) malloc (sizeof (VerticeCusto));
+    verticeCusto->vertice = vertice;
+    verticeCusto->custo = custo;
 
     return verticeCusto;
 
 }
 
-void diminuirValorChave(VerticeCusto V[], int i, double chave){
+void trocar(VerticeCusto **v1, VerticeCusto **v2){
 
-    if(chave > V[i].custo){
+    VerticeCusto *aux = *v1;
+    *v1 = *v2;
+    *v2 = aux;
 
-       printf("Erro: chave maior que o atual");
-       return;
+}
 
-    }
+void atualizarHeapMinimo(HeapMinimo *heapMinimo, int i){
 
-    V[i].custo = chave;
+    int direita = (2 * i) + 2, esquerda = (2 * i) + 1, menor = i;
 
-    while(i > 0 && V[pai(i)].custo > V[i].custo){
+    if(esquerda < heapMinimo->numeroVertices && heapMinimo->valores[esquerda]->custo < heapMinimo->valores[menor]->custo)
+        menor = esquerda;
 
-       trocar(V, i, pai(i));
-       i = pai(i);
-   
+    if(direita < heapMinimo->numeroVertices && heapMinimo->valores[direita]->custo < heapMinimo->valores[menor]->custo)
+        menor = direita;
+
+    if(menor != i){
+
+        VerticeCusto *menorVertice = heapMinimo->valores[menor];
+        VerticeCusto *verticeI = heapMinimo->valores[i];
+
+        heapMinimo->posicoes[menorVertice->vertice] = i;
+        heapMinimo->posicoes[verticeI->vertice] = menor;
+
+        trocar(&heapMinimo->valores[menor], &heapMinimo->valores[i]);
+
+        atualizarHeapMinimo(heapMinimo, menor);
+
     }
 
 }
 
-void inserirHeapMinimo(VerticeCusto V[], double chave, int *tam){
+int vazio(HeapMinimo *heapMinimo){
 
-    (*tam)++;
-    V[(*tam) - 1].custo = INT_MAX;
-
-    diminuirValorChave(V, (*tam) - 1, chave);
+    return heapMinimo->numeroVertices == 0 ? 1 : 0;
 
 }
 
-int existe(VerticeCusto V[], int vertice, int tam){
+VerticeCusto *extrairMinimo(HeapMinimo *heapMinimo){
 
-    for(int i = 0; i < tam; i++)
-        if(vertice == V[i].vertice)
-            return 1;
+    if(vazio(heapMinimo))
+        return NULL;
+
+    VerticeCusto *raiz = heapMinimo->valores[0];
+    VerticeCusto *ultimo = heapMinimo->valores[heapMinimo->numeroVertices - 1];
+    heapMinimo->valores[0] = ultimo;
+
+    heapMinimo->posicoes[raiz->vertice] = heapMinimo->numeroVertices - 1;
+    heapMinimo->posicoes[ultimo->vertice] = 0;
+
+    heapMinimo->numeroVertices--;
+    atualizarHeapMinimo(heapMinimo, 0);
+
+    return raiz;
+
+}
+
+void diminuirValorCusto(HeapMinimo *heapMinimo, int vertice, int custo){
+
+    int posicao = heapMinimo->posicoes[vertice];
+
+    heapMinimo->valores[posicao]->custo = custo;
+
+    while(posicao && heapMinimo->valores[posicao]->custo < heapMinimo->valores[(posicao - 1) / 2]->custo){
+
+        heapMinimo->posicoes[heapMinimo->valores[posicao]->vertice] = (posicao - 1) / 2;
+        heapMinimo->posicoes[heapMinimo->valores[(posicao - 1) / 2]->vertice] = posicao;
+        trocar(&heapMinimo->valores[posicao], &heapMinimo->valores[(posicao - 1) / 2]);
+
+        posicao = (posicao - 1) / 2;
+
+    }
+
+}
+
+int existe(HeapMinimo *heapMinimo, int vertice){
+
+    if(heapMinimo->posicoes[vertice] < heapMinimo->numeroVertices)
+        return 1;
 
     return 0;
-}
-
-int retornarPosicao(VerticeCusto V[], int vertice, int tam){
-
-    for(int i = 0; i < tam; i++)
-        if(vertice == V[i].vertice)
-            return i;
-
-    return -1;
-
-}
-
-double calcularDistanciaPontos(Ponto p1, Ponto p2){
-
-    return sqrt(pow((p1.x - p2.x) , 2) + pow((p1.y - p2.y), 2));
-
+    
 }
