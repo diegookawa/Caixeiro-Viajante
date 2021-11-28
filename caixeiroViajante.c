@@ -118,7 +118,7 @@ int main(int argc, char *argv[]){
     agm = prim(grafo, 0, pontos);
     ciclo = buscaProfundidade(agm, 0);
 
-    printf("Custo total: %lf\n", calcularCustoTotal(pontos, ciclo, tam));
+    printf("Custo total: %lf\n", calcularCustoTotal(pontos, ciclo, agm->vertices));
 
     free(ciclo);
     free(pontos);
@@ -215,31 +215,21 @@ void imprimirGrafo(Grafo *grafo){
 
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
-    No *ultimo = NULL;
+    No *novo = (No *) malloc (sizeof(No));
+    novo->id = v2;
+    novo->peso = peso;
 
-    for(No *aux = grafo->adjacencias[v1]; aux != NULL; aux = aux->proximo){
+    if(grafo->adjacencias[v1] == NULL)
+        novo->proximo = NULL;
 
-        if(aux->id == v2){
+    else {
 
-            printf("A aresta ja existe\n");
-            return;
-
-        }
-
-        ultimo = aux;
+        No *aux = grafo->adjacencias[v1];
+        novo->proximo = aux;
 
     }
 
-    No *novo = (No *) malloc (sizeof(No));
-    novo->id = v2;
-    novo->proximo = NULL;
-    novo->peso = peso;
-
-    if(ultimo != NULL)
-        ultimo->proximo = novo;
-
-    else 
-        grafo->adjacencias[v1] = novo;
+    grafo->adjacencias[v1] = novo;
 
     grafo->arestas++;
 
@@ -302,6 +292,8 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
     exportarAGM(agm, pontos);
 
+    //imprimirGrafo(agm);
+
     return agm;
 
 }
@@ -318,7 +310,7 @@ int *buscaProfundidade(Grafo *agm, int vertice){
     ciclo[0] = vertice;
     buscaProfundidadeAuxiliar(agm, vertice, ciclo, &itr, visitados);
     ciclo[agm->vertices] = vertice;
-
+    
     return ciclo;
 
 }
@@ -345,7 +337,7 @@ double calcularCustoTotal(Ponto pontos[], int ciclo[], int tam){
 
     double custoTotal = 0;
 
-    for(int i = 0; i < tam; i++)
+    for(int i = 0; i < tam - 1; i++)
         custoTotal += calcularDistanciaPontos(pontos[ciclo[i]], pontos[ciclo[i + 1]]);
 
     custoTotal += calcularDistanciaPontos(pontos[ciclo[(tam - 1)]], pontos[ciclo[0]]);
