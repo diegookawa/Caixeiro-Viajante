@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <float.h>
+#include <time.h>
 #include <math.h>
 
 typedef struct no {
@@ -53,6 +54,7 @@ void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
 void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int *itr, int visitados[]);
 void imprimirGrafo(Grafo *grafo);
 void exportarAGM(Grafo *agm, Ponto pontos[]);
+void exportarCiclo(int ciclo[], Ponto *pontos, int tam);
 double calcularCustoTotal(Ponto pontos[], int ciclo[], int tam);
 Ponto *lerArquivo(char nomeArquivo[], int *tam);
 Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]);
@@ -73,6 +75,8 @@ HeapMinimo *criarHeapMinimo(int tam);
 
 int main(int argc, char *argv[]){
 
+    char *nomeArquivo = (argc > 1) ? argv[1] : "input.txt";
+    clock_t inicio = clock();
     Grafo *grafo, *agm;
     Ponto *pontos;
     int tam, *ciclo;
@@ -117,7 +121,7 @@ int main(int argc, char *argv[]){
     adicionarAresta(5, 4, 100, grafo);
     */
 
-    pontos = lerArquivo("input.txt", &tam);
+    pontos = lerArquivo(nomeArquivo, &tam);
     grafo = preencherGrafo(pontos, tam);
     
     //printf("Grafo completo: \n");
@@ -128,7 +132,10 @@ int main(int argc, char *argv[]){
     agm = prim(grafo, 0, pontos);
     ciclo = buscaProfundidade(agm, 0);
 
-    printf("Custo total: %lf\n", calcularCustoTotal(pontos, ciclo, agm->vertices));
+    printf("%.6f %.6f", (clock() - inicio)/(double)CLOCKS_PER_SEC, calcularCustoTotal(pontos, ciclo, agm->vertices));
+
+    exportarAGM(agm, pontos);
+    exportarCiclo(ciclo, pontos, tam);
 
     free(ciclo);
     free(pontos);
@@ -303,9 +310,7 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
     for(int i = 0; i < agm->vertices; i++)
         custoAGM += custos[i];
 
-    printf("Custo agm: %lf\n", custoAGM);
-
-    exportarAGM(agm, pontos);
+    //printf("Custo agm: %lf\n", custoAGM);
 
     //imprimirGrafo(agm);
 
@@ -361,6 +366,27 @@ double calcularCustoTotal(Ponto pontos[], int ciclo[], int tam){
 
     return custoTotal;
 
+}
+
+void exportarCiclo(int ciclo[], Ponto *pontos, int tam){
+
+    FILE *arquivo;
+
+    arquivo = fopen("cycle.txt", "w");
+
+    if(arquivo == NULL){
+
+        printf("ERRO AO ABRIR O ARQUIVO.");
+        getchar();
+        exit(1);
+
+    }
+
+    for(int i = 0; i <= tam; i++)
+        fprintf(arquivo, "%d %d\n", (int) pontos[ciclo[i]].x, (int) pontos[ciclo[i]].y);   
+
+    fclose(arquivo);
+ 
 }
 
 void exportarAGM(Grafo *agm, Ponto pontos[]){
