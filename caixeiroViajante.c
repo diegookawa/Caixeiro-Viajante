@@ -61,14 +61,15 @@ Grafo *preencherGrafo(Ponto pontos[], int tam);
 
 //Funcoes para HEAP minimo
 int existe(HeapMinimo *heapMinimo, int vertice);
+int vazio(HeapMinimo *heapMinimo);
 void trocar(VerticeCusto **v1, VerticeCusto **v2);
 void atualizarHeapMinimo(HeapMinimo *heapMinimo, int i);
 void diminuirValorCusto(HeapMinimo *heapMinimo, int vertice, int custo);
 void inserirHeapMinimo(VerticeCusto V[], double chave, int *tam);
+void destruirHeapMinimo(HeapMinimo *heapMinimo);
 VerticeCusto *extrairMinimo(HeapMinimo *heapMinimo);
 VerticeCusto *adicionarVerticeHeap(int vertice, double custo);
 HeapMinimo *criarHeapMinimo(int tam);
-int vazio(HeapMinimo *heapMinimo);
 
 int main(int argc, char *argv[]){
 
@@ -286,6 +287,8 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
         }
 
+        free(u);
+
     }
 
     for(int i = 1; i < grafo->vertices; i++){
@@ -305,6 +308,8 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
     exportarAGM(agm, pontos);
 
     //imprimirGrafo(agm);
+
+    destruirHeapMinimo(heapMinimo);
 
     return agm;
 
@@ -499,4 +504,12 @@ int existe(HeapMinimo *heapMinimo, int vertice){
 
     return 0;
     
+}
+
+void destruirHeapMinimo(HeapMinimo *heapMinimo){
+
+    free(heapMinimo->posicoes);
+    free(heapMinimo->valores);
+    free(heapMinimo);
+
 }
