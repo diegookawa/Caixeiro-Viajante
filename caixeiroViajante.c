@@ -84,46 +84,6 @@ int main(int argc, char *argv[]){
     char *nomeArquivo = (argc > 1) ? argv[1] : "input.txt";
     int tam, *ciclo;
 
-    /*
-    grafo = criarGrafo(6);
-
-    adicionarAresta(0, 1, 223, grafo);
-    adicionarAresta(0, 2, 360, grafo);
-    adicionarAresta(0, 3, 316, grafo);
-    adicionarAresta(0, 4, 223, grafo);
-    adicionarAresta(0, 5, 200, grafo);
-
-    adicionarAresta(1, 0, 223, grafo);
-    adicionarAresta(1, 2, 200, grafo);
-    adicionarAresta(1, 3, 360, grafo);
-    adicionarAresta(1, 4, 141, grafo);
-    adicionarAresta(1, 5, 223, grafo);
-
-    adicionarAresta(2, 0, 360, grafo);
-    adicionarAresta(2, 1, 200, grafo);
-    adicionarAresta(2, 3, 300, grafo);
-    adicionarAresta(2, 4, 141, grafo);
-    adicionarAresta(2, 5, 223, grafo);
-
-    adicionarAresta(3, 0, 316, grafo);
-    adicionarAresta(3, 1, 360, grafo);
-    adicionarAresta(3, 2, 300, grafo);
-    adicionarAresta(3, 4, 223, grafo);
-    adicionarAresta(3, 5, 141, grafo);
-
-    adicionarAresta(4, 0, 223, grafo);
-    adicionarAresta(4, 2, 141, grafo);
-    adicionarAresta(4, 1, 141, grafo);
-    adicionarAresta(4, 3, 223, grafo);
-    adicionarAresta(4, 5, 100, grafo);
-
-    adicionarAresta(5, 0, 200, grafo);
-    adicionarAresta(5, 1, 223, grafo);
-    adicionarAresta(5, 2, 223, grafo);
-    adicionarAresta(5, 3, 141, grafo);
-    adicionarAresta(5, 4, 100, grafo);
-    */
-
     pontos = lerArquivo(nomeArquivo, &tam);
     grafo = preencherGrafo(pontos, tam);
     
@@ -446,9 +406,9 @@ HeapMinimo *criarHeapMinimo(int tam){
     HeapMinimo *heapMinimo = (HeapMinimo *) malloc (sizeof (HeapMinimo));
 
     heapMinimo->posicoes = (int *) malloc (tam * sizeof (int));
-    heapMinimo->numeroVertices = 0;
     heapMinimo->tamanhoTotal = tam;
     heapMinimo->valores = (VerticeCusto **) malloc (tam * sizeof (VerticeCusto *));
+    heapMinimo->numeroVertices = 0;
 
     return heapMinimo;
 
@@ -545,7 +505,7 @@ void diminuirValorCusto(HeapMinimo *heapMinimo, int vertice, int custo){
 
         trocar(&heapMinimo->valores[posicao], &heapMinimo->valores[pai(posicao)]);
 
-        posicao = (posicao - 1) / 2;
+        posicao = pai(posicao);
     
     }
 
