@@ -456,7 +456,7 @@ VerticeCusto extrairMinimo(HeapMinimo *heapMinimo, int *tam){
     heapMinimo->valores[0] = heapMinimo->valores[(*tam) - 1];
 
     heapMinimo->posicoes[verticeCusto.vertice] = (*tam) - 1;
-    heapMinimo->posicoes[0] = 0;
+    heapMinimo->posicoes[heapMinimo->valores[0].vertice] = 0;
     
     (*tam)--;
 
