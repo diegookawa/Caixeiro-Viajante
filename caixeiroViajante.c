@@ -269,8 +269,6 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
     printf("Custo agm: %lf\n", custoAGM);
 
-    exportarAGM(agm, pontos);
-
     return agm;
 
 }
