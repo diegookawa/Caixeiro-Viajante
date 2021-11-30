@@ -5,48 +5,55 @@
 #include <time.h>
 #include <math.h>
 
+/*Estrutura que define um nó do grafo.*/
 typedef struct no {
 
-    int id;
-    double peso;
-    struct no *proximo;
+    int id; //Número do vértice.
+    double peso; //Peso da aresta.
+    struct no *proximo; //Ponteiro para o próximo nó.
     
 } No;
 
+/*Estrutura que representa o grafo.*/
 typedef struct grafo {
 
-    int arestas;
-    int vertices;
-    No **adjacencias;
+    int arestas; //Número de arestas do grafo.
+    int vertices; //Número de vértices do grafo.
+    No **adjacencias; //Lista de adjacências do grafo.
 
 } Grafo;
 
+/*Estrutura que armazena um vértice e um determinado custo associado a ele (é usada na construção do HEAP mínimo).*/
 typedef struct verticeCusto {
 
-    int vertice;
-    double custo;
+    int vertice; //Número do vértice.
+    double custo; //Custo associado ao vértice.
 
 } VerticeCusto;
 
+/*Estrutura que representa um HEAP mínimo.*/
 typedef struct heapMinimo {
 
-    int tamanho;
-    int *posicoes;
-    VerticeCusto *valores;
+    int tamanho; //Quantidade atual de vértices no HEAP mínimo.
+    int *posicoes; //Vetor de posições associadas a cada vértice armazenado no HEAP mínimo.
+    VerticeCusto *valores; //Vetor de nós do HEAP mínimo (cada nó armazena um vértice e um custo associado).
 
 } HeapMinimo;
 
+/*Estrutura que representa um ponto no plano cartesiano.*/
 typedef struct ponto {
     
-    double x;
-    double y;
+    double x; //Valor correspondente ao eixo X.
+    double y; //Valor correspondente ao eixo Y.
 
 } Ponto;
 
-//Funcoes para pontos
+/*Funcoes para pontos.*/
+
 double calcularDistanciaPontos(Ponto p1, Ponto p2);
 
-//Funcoes para grafos
+/*Funcoes para grafos.*/
+
 int *buscaProfundidade(Grafo *agm, int vertice);
 void destruirGrafo(Grafo *grafo);
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo);
@@ -63,7 +70,8 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]);
 Grafo *criarGrafo(int tamanho);
 Grafo *preencherGrafo(Ponto pontos[], int tam);
 
-//Funcoes para HEAP minimo
+/*Funcoes para HEAP mínimo.*/
+
 int pai(int i);
 int filhoEsquerda(int i);
 int filhoDireita(int i);
@@ -100,6 +108,7 @@ int main(int argc, char *argv[]){
 
 }
 
+/*Função que cria um vetor de pontos a partir de pontos dados como entrada em um arquivo .txt. Retorna um vetor de pontos.*/
 Ponto *lerArquivo(char nomeArquivo[], int *tam){
 
     FILE *arquivo;
@@ -169,6 +178,7 @@ void destruirGrafo(Grafo *grafo){
 
 }
 
+/*Teste*/
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
     No *novo = (No *) malloc (sizeof(No));
@@ -251,6 +261,7 @@ void inicializarPrim(HeapMinimo *heapMinimo, double custos[], int prodecessores[
 
 }
 
+/*Função que gera o vetor que representa o ciclo. Chama a função buscaProfundidadeAuxiliar() que realiza a busca em profundidade.*/
 int *buscaProfundidade(Grafo *agm, int vertice){
 
     int *ciclo, itr = 1, visitados[agm->vertices];
@@ -267,6 +278,10 @@ int *buscaProfundidade(Grafo *agm, int vertice){
 
 }
 
+/*Função que faz a busca em profundidade. Possui um grafo, um vértice, um vetor representando o ciclo e seu respectivo iterador e 
+um vetor de vértices já visitados como entrada. Para cada vértice adjacente ao vértice de entrada, caso ele não tenha sido visitado,
+o adiciona no vetor de ciclo e chama a própria função recursivamente. O vetor de ciclo é preenchido por referência, a função possui
+retorno void.*/
 void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int *itr, int visitados[]){
 
     visitados[vertice] = 1;
@@ -285,6 +300,9 @@ void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int *itr, i
 
 }
 
+/*Função que calcula o custo total do ciclo. Possui um vetor de pontos, um vetor de ciclo e um tamanho como entrada. Para cada vértice
+armazenado no vetor do ciclo, calcula sua distância euclidiana com relação ao próximo ponto do ciclo. Para o penúltimo ponto, calcula
+a distância entre ele e o primeiro ponto. Retorna o custo total do ciclo.*/
 double calcularCustoTotal(Ponto pontos[], int ciclo[], int tam){
 
     double custoTotal = 0;
@@ -298,6 +316,7 @@ double calcularCustoTotal(Ponto pontos[], int ciclo[], int tam){
 
 }
 
+/*Função que exporta os pontos pertencentes ao ciclo em um arquivo "cycle.txt".*/
 void exportarCiclo(int ciclo[], Ponto *pontos, int tam){
 
     FILE *arquivo;
@@ -319,6 +338,7 @@ void exportarCiclo(int ciclo[], Ponto *pontos, int tam){
  
 }
 
+/*Função que exporta os pontos da AGM criada em um arquivo "tree.txt".*/
 void exportarAGM(Grafo *agm, Ponto pontos[]){
 
     FILE *arquivo;
@@ -344,30 +364,36 @@ void exportarAGM(Grafo *agm, Ponto pontos[]){
 
 }
 
+/*Função que retorna a distância euclidiana entre dois pontos*/
 double calcularDistanciaPontos(Ponto p1, Ponto p2){
 
     return sqrt(pow((p1.x - p2.x) , 2) + pow((p1.y - p2.y), 2));
 
 }
 
+/*Função que retorna a posição do pai de um elemento no HEAP mínimo.*/
 int pai(int i){
 
     return (i - 1) / 2;
 
 }
 
+/*Função que retorna a posição do filho da esquerda em um HEAP mínimo.*/
 int filhoEsquerda(int i){
 
     return (i * 2) + 1;
 
 }
 
+/*Função que retorna a posição do filho da direita em um HEAP mínimo.*/
 int filhoDireita(int i){
 
     return (i * 2) + 2;
 
 }
 
+/*Função que aloca o HEAP mínimo e seus respectivos atributos do tipo ponteiro (posicoes e valores). Possui um inteiro como entrada para
+representar o tamanho do HEAP mínimo. Retorna um ponteiro para HEAP mínimo.*/
 HeapMinimo *criarHeapMinimo(int tam){
 
     HeapMinimo *heapMinimo;
@@ -381,6 +407,7 @@ HeapMinimo *criarHeapMinimo(int tam){
 
 }
 
+/*Função que desaloca o heapMínimo e seus respectivos atributos do tipo ponteiro (posicoes e valores).*/
 void destruirHeapMinimo(HeapMinimo *heapMinimo){
 
     free(heapMinimo->valores);
