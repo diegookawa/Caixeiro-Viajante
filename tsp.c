@@ -118,7 +118,7 @@ Ponto *lerArquivo(char nomeArquivo[], int *tam){
 
     if(arquivo == NULL){
 
-        printf("ERRO AO ABRIR O ARQUIVO.");
+        printf("ERRO AO ABRIR O ARQUIVO.\n");
         getchar();
         exit(1);
 
@@ -325,7 +325,7 @@ void exportarCiclo(int ciclo[], Ponto *pontos, int tam){
 
     if(arquivo == NULL){
 
-        printf("ERRO AO ABRIR O ARQUIVO.");
+        printf("ERRO AO ABRIR O ARQUIVO.\n");
         getchar();
         exit(1);
 
@@ -347,7 +347,7 @@ void exportarAGM(Grafo *agm, Ponto pontos[]){
 
     if(arquivo == NULL){
 
-        printf("ERRO AO ABRIR O ARQUIVO.");
+        printf("ERRO AO ABRIR O ARQUIVO.\n");
         getchar();
         exit(1);
 
@@ -466,7 +466,7 @@ VerticeCusto extrairMinimo(HeapMinimo *heapMinimo){
     VerticeCusto verticeCusto;
 
     if(heapMinimo->tamanho < 1)
-        printf("Erro: heap underflow");
+        printf("Erro: heap underflow\n");
 
     verticeCusto = heapMinimo->valores[0];
 
@@ -485,7 +485,7 @@ void diminuirValorChave(HeapMinimo *heapMinimo, int i, double chave){
 
     if(chave > heapMinimo->valores[i].custo){
         
-        printf("Erro: chave maior que o atual");
+        printf("Erro: chave maior que o atual\n");
         return;
     }
 
@@ -524,7 +524,7 @@ void marcarNaoVisitados(int visitados[], int tam){
 
 void imprimirCustoTotal(clock_t inicio, Ponto pontos[], int ciclo[], int tam){
 
-    printf("%.6f %.6f", (clock() - inicio) / (double)CLOCKS_PER_SEC, calcularCustoTotal(pontos, ciclo, tam));
+    printf("%.6f %.6f\n", (clock() - inicio) / (double)CLOCKS_PER_SEC, calcularCustoTotal(pontos, ciclo, tam));
    
 }
 
