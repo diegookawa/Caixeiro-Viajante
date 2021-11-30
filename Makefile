@@ -1,5 +1,5 @@
 all:
-	gcc caixeiroViajante.c -o caixeiroViajante -lm
+	gcc tsp.c -o tsp -lm
 
 clean:
-	rm -f caixeiroViajante;
+	rm -f tsp;
