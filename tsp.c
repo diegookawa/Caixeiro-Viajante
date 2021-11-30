@@ -85,6 +85,8 @@ void destruirHeapMinimo(HeapMinimo *heapMinimo);
 VerticeCusto extrairMinimo(HeapMinimo *heapMinimo);
 HeapMinimo *criarHeapMinimo(int tam);
 
+
+/*Programa para encontrar uma aproximação para o problema do Caixeiro Viajante*/
 int main(int argc, char *argv[]){
 
     char *nomeArquivo = (argc > 1) ? argv[1] : "input.txt";
@@ -95,9 +97,9 @@ int main(int argc, char *argv[]){
     
     inicio = clock();
     pontos = lerArquivo(nomeArquivo, &tam);
-    grafo = preencherGrafo(pontos, tam);
-    agm = prim(grafo, 0, pontos);
-    ciclo = buscaProfundidade(agm, 0);
+    grafo = preencherGrafo(pontos, tam);        //Passo 1. Computar um grafo completo dos pontos, sendo o custo a distancia euclidiana
+    agm = prim(grafo, 0, pontos);               //Passo 2. Computar a Árvore Geradora Mímina
+    ciclo = buscaProfundidade(agm, 0);          //Passo 3. Computar o ciclo usando Busca em Profundidade
 
     exportarAGM(agm, pontos);
     exportarCiclo(ciclo, pontos, tam);
@@ -137,6 +139,7 @@ Ponto *lerArquivo(char nomeArquivo[], int *tam){
 
 }
 
+/*Função para inicializar a estrutura de um grafo*/
 Grafo *criarGrafo(int tamanho){
 
     Grafo *grafo = (Grafo *) malloc (sizeof(Grafo));
@@ -152,6 +155,7 @@ Grafo *criarGrafo(int tamanho){
 
 }
 
+/*Função para criar um grafo com pontos ligados por arestas com peso da distância euclidiana entre eles*/
 Grafo *preencherGrafo(Ponto pontos[], int tam){
 
     Grafo *grafo;
@@ -167,6 +171,7 @@ Grafo *preencherGrafo(Ponto pontos[], int tam){
 
 }
 
+/*Função para liberar um grafo da memória*/
 void destruirGrafo(Grafo *grafo){
 
     for(int i = 0; i < grafo->vertices; i++)
@@ -178,7 +183,7 @@ void destruirGrafo(Grafo *grafo){
 
 }
 
-/*Teste*/
+/*Função para adicionar uma aresta entre dois vértices em um grafo*/
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
     No *novo = (No *) malloc (sizeof(No));
@@ -200,6 +205,7 @@ void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
 }
 
+/*Função que utiliza o algoritmo de Prim para computar uma árvore geradora mínima*/
 Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
     int prodecessores[grafo->vertices];
@@ -247,6 +253,7 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
 }
 
+/*Função que preenche um heap mínimo para ser usado no algoritmo de Prim*/
 void inicializarPrim(HeapMinimo *heapMinimo, double custos[], int prodecessores[], int tam){
 
     for(int i = 0; i < tam; i++){
@@ -416,6 +423,7 @@ void destruirHeapMinimo(HeapMinimo *heapMinimo){
 
 }
 
+/*Função que atualiza o HEAP mínimo para garantir a árvore*/
 void atualizarHeapMinimo(HeapMinimo *heapMinimo, int i){
 
     int esquerda = filhoEsquerda(i);
@@ -446,6 +454,7 @@ void atualizarHeapMinimo(HeapMinimo *heapMinimo, int i){
 
 }
 
+/*Função que troca os valores das posições A e B em um HEAP mínimo*/
 void trocar(HeapMinimo *heapMinimo, int a, int b){
 
     VerticeCusto aux = heapMinimo->valores[a];
@@ -454,6 +463,7 @@ void trocar(HeapMinimo *heapMinimo, int a, int b){
 
 }
 
+/*Função que ordena o HEAP mínimo*/
 void construirHeapMinimo(HeapMinimo *heapMinimo){
 
     for(int i = 0; i < heapMinimo->tamanho / 2; i++)
@@ -461,6 +471,7 @@ void construirHeapMinimo(HeapMinimo *heapMinimo){
 
 }
 
+/**/
 VerticeCusto extrairMinimo(HeapMinimo *heapMinimo){
 
     VerticeCusto verticeCusto;
@@ -481,6 +492,7 @@ VerticeCusto extrairMinimo(HeapMinimo *heapMinimo){
 
 }
 
+/**/
 void diminuirValorChave(HeapMinimo *heapMinimo, int i, double chave){
 
     if(chave > heapMinimo->valores[i].custo){
@@ -503,18 +515,21 @@ void diminuirValorChave(HeapMinimo *heapMinimo, int i, double chave){
     
 }
 
+/*Função que verifica se existe um vertice no HEAP mínimo*/
 int existe(HeapMinimo *heapMinimo, int vertice){
 
     return (heapMinimo->posicoes[vertice] < heapMinimo->tamanho) ? 1 : 0;
 
 }
 
+/*Função que verifica se o HEAP mínimo está vazio*/
 int vazio(HeapMinimo *heapMinimo){
 
     return (heapMinimo->tamanho <= 0) ? 1 : 0;
 
 }
 
+/*Função para preencher o vetor que indica os vertices visitados*/
 void marcarNaoVisitados(int visitados[], int tam){
 
     for(int i = 0; i < tam; i++)
@@ -522,12 +537,14 @@ void marcarNaoVisitados(int visitados[], int tam){
 
 }
 
+/*Função que imprime o custo total do ciclo*/
 void imprimirCustoTotal(clock_t inicio, Ponto pontos[], int ciclo[], int tam){
 
     printf("%.6f %.6f\n", (clock() - inicio) / (double)CLOCKS_PER_SEC, calcularCustoTotal(pontos, ciclo, tam));
    
 }
 
+/*Função que libera as estruturas utilizadas pelo programa da memória*/
 void destruirEstruturas(int ciclo[], Ponto pontos[], Grafo *grafo, Grafo *agm){
 
     free(ciclo);
