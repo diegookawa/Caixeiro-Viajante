@@ -54,6 +54,9 @@ void buscaProfundidadeAuxiliar(Grafo *agm, int vertice, int ciclo[], int *itr, i
 void exportarAGM(Grafo *agm, Ponto pontos[]);
 void exportarCiclo(int ciclo[], Ponto *pontos, int tam);
 void inicializarPrim(HeapMinimo *heapMinimo, double custos[], int prodecessores[], int tam);
+void marcarNaoVisitados(int visitados[], int tam);
+void imprimirCustoTotal(clock_t inicio, Ponto pontos[], int ciclo[], int tam);
+void destruirEstruturas(int ciclo[], Ponto pontos[], Grafo *grafo, Grafo *agm);
 double calcularCustoTotal(Ponto pontos[], int ciclo[], int tam);
 Ponto *lerArquivo(char nomeArquivo[], int *tam);
 Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]);
@@ -65,6 +68,7 @@ int pai(int i);
 int filhoEsquerda(int i);
 int filhoDireita(int i);
 int existe(HeapMinimo *heapMinimo, int vertice);
+int vazio(HeapMinimo *heapMinimo);
 void trocar(HeapMinimo *heapMinimo, int a, int b);
 void atualizarHeapMinimo(HeapMinimo *heapMinimo, int i);
 void construirHeapMinimo(HeapMinimo *heapMinimo);
@@ -75,29 +79,22 @@ HeapMinimo *criarHeapMinimo(int tam);
 
 int main(int argc, char *argv[]){
 
+    char *nomeArquivo = (argc > 1) ? argv[1] : "input.txt";
     int tam, *ciclo;
     clock_t inicio;
     Grafo *grafo, *agm;
     Ponto *pontos;
     
-    char *nomeArquivo = (argc > 1) ? argv[1] : "input.txt";
-
     inicio = clock();
     pontos = lerArquivo(nomeArquivo, &tam);
     grafo = preencherGrafo(pontos, tam);
-
     agm = prim(grafo, 0, pontos);
     ciclo = buscaProfundidade(agm, 0);
 
     exportarAGM(agm, pontos);
     exportarCiclo(ciclo, pontos, tam);
-
-    printf("%.6f %.6f", (clock() - inicio) / (double)CLOCKS_PER_SEC, calcularCustoTotal(pontos, ciclo, agm->vertices));
-
-    free(ciclo);
-    free(pontos);
-    destruirGrafo(agm);
-    destruirGrafo(grafo);
+    imprimirCustoTotal(inicio, pontos, ciclo, agm->vertices);
+    destruirEstruturas(ciclo, pontos, grafo, agm);
 
     return 0;
 
@@ -209,7 +206,7 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
     construirHeapMinimo(heapMinimo);
     diminuirValorChave(heapMinimo, vertice, 0);
 
-    while(heapMinimo->tamanho > 0){
+    while(!vazio(heapMinimo)){
 
         VerticeCusto u = extrairMinimo(heapMinimo);
 
@@ -233,13 +230,6 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
         adicionarAresta(i, prodecessores[i], custos[i], agm);
 
     }
-
-    double custoAGM = 0;
-
-    for(int i = 0; i < agm->vertices; i++)
-        custoAGM += custos[i];
-
-    printf("Custo agm: %lf\n", custoAGM);
 
     destruirHeapMinimo(heapMinimo);
 
@@ -267,8 +257,7 @@ int *buscaProfundidade(Grafo *agm, int vertice){
 
     ciclo = malloc ((agm->vertices + 1) * sizeof (int));
 
-    for(int i = 0; i < agm->vertices; i++)
-        visitados[i] = 0;
+    marcarNaoVisitados(visitados, agm->vertices);
     
     ciclo[0] = vertice;
     buscaProfundidadeAuxiliar(agm, vertice, ciclo, &itr, visitados);
@@ -346,11 +335,8 @@ void exportarAGM(Grafo *agm, Ponto pontos[]){
 
     for(int i = 0; i < agm->vertices; i++){
 
-        for(No *aux = agm->adjacencias[i]; aux != NULL; aux = aux->proximo){
-
+        for(No *aux = agm->adjacencias[i]; aux != NULL; aux = aux->proximo)
             fprintf(arquivo, "%d %d\n%d %d\n", (int) pontos[i].x, (int) pontos[i].y, (int) pontos[aux->id].x, (int) pontos[aux->id].y);
-
-        }
 
     }
 
@@ -493,5 +479,33 @@ void diminuirValorChave(HeapMinimo *heapMinimo, int i, double chave){
 int existe(HeapMinimo *heapMinimo, int vertice){
 
     return (heapMinimo->posicoes[vertice] < heapMinimo->tamanho) ? 1 : 0;
+
+}
+
+int vazio(HeapMinimo *heapMinimo){
+
+    return (heapMinimo->tamanho <= 0) ? 1 : 0;
+
+}
+
+void marcarNaoVisitados(int visitados[], int tam){
+
+    for(int i = 0; i < tam; i++)
+        visitados[i] = 0;
+
+}
+
+void imprimirCustoTotal(clock_t inicio, Ponto pontos[], int ciclo[], int tam){
+
+    printf("%.6f %.6f", (clock() - inicio) / (double)CLOCKS_PER_SEC, calcularCustoTotal(pontos, ciclo, tam));
+   
+}
+
+void destruirEstruturas(int ciclo[], Ponto pontos[], Grafo *grafo, Grafo *agm){
+
+    free(ciclo);
+    free(pontos);
+    destruirGrafo(agm);
+    destruirGrafo(grafo);
 
 }
