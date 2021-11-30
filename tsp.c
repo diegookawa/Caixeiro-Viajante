@@ -471,7 +471,7 @@ void construirHeapMinimo(HeapMinimo *heapMinimo){
 
 }
 
-/**/
+/*Função que extrai o menor custo do HEAP mínimo*/
 VerticeCusto extrairMinimo(HeapMinimo *heapMinimo){
 
     VerticeCusto verticeCusto;
@@ -492,7 +492,7 @@ VerticeCusto extrairMinimo(HeapMinimo *heapMinimo){
 
 }
 
-/**/
+/*Função que diminui o valor de uma chave e reajusta o HEAP mínimo*/
 void diminuirValorChave(HeapMinimo *heapMinimo, int i, double chave){
 
     if(chave > heapMinimo->valores[i].custo){
