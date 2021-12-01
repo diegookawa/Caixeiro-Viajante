@@ -165,7 +165,8 @@ Grafo *criarGrafo(int tamanho){
 
 }
 
-/*Função para criar um grafo com pontos ligados por arestas com peso da distância euclidiana entre eles.*/
+/*Função para criar um grafo completo com pontos ligados por arestas com peso da distância euclidiana entre eles. Para cada vértice
+são criadas arestas que o ligam para todos os outros vértices. Retorna o grafo completo.*/
 Grafo *preencherGrafo(Ponto pontos[], int tam){
 
     Grafo *grafo;
@@ -193,7 +194,8 @@ void destruirGrafo(Grafo *grafo){
 
 }
 
-/*Função para adicionar uma aresta entre dois vértices em um grafo.*/
+/*Função para adicionar uma aresta entre dois vértices em um grafo. Por motivos de diminuir a complexidade do algoritmo, a aresta é
+inserida cada vez no início da lista de adjacências de cada vértice e não no final.*/
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
     No *novo = (No *) malloc (sizeof(No));
@@ -216,7 +218,9 @@ void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 }
 
 /*Função que utiliza o algoritmo de Prim para computar uma árvore geradora mínima. Possui um grafo, um vértice raíz e um vetor de pontos
-como entrada. Retorna uma AGM do tipo Grafo *.*/
+como entrada. Retorna uma AGM do tipo Grafo *. Foram criados dois vetores, um de prodecessores e um de custos. Cada qual armazena uma
+informação sobre um determinado vértice (quem é seu pai (prodecessor) e qual o custo para chegar até ele a partir do procecessor. Com
+o resultado do vetor de prodecessores e custos, são adicionadas as arestas na Árvore Geradora Mínima e então ela é retornada.*/
 Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
     int prodecessores[grafo->vertices];
@@ -264,7 +268,8 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
 }
 
-/*Função que inicializa os valores do HEAP mínimo, custos e prodecessores para serem usados no PRIM.*/
+/*Função que inicializa os valores do HEAP mínimo, custos e prodecessores para serem usados no PRIM. Inicialmente todos os vértices possuem
+custo infinito e prodecessores iguais a -1.*/
 void inicializarPrim(HeapMinimo *heapMinimo, double custos[], int prodecessores[], int tam){
 
     for(int i = 0; i < tam; i++){
@@ -279,7 +284,9 @@ void inicializarPrim(HeapMinimo *heapMinimo, double custos[], int prodecessores[
 
 }
 
-/*Função que gera o vetor que representa o ciclo. Chama a função buscaProfundidadeAuxiliar() que realiza a busca em profundidade.*/
+/*Função que gera o vetor que representa o ciclo. Chama a função buscaProfundidadeAuxiliar() que realiza a busca em profundidade. O primeiro
+elemento do ciclo é o vértice escolhido como raíz (usado no PRIM), assim como o último. Inicialmente, a função marca todos os vértices como
+não visitados através da função marcarNaoVisitados() e, por fim, a função retorna o vetor que representa o ciclo.*/
 int *buscaProfundidade(Grafo *agm, int vertice){
 
     int *ciclo, itr = 1, visitados[agm->vertices];
@@ -479,7 +486,9 @@ void construirHeapMinimo(HeapMinimo *heapMinimo){
 
 }
 
-/*Função que extrai o menor custo do HEAP mínimo.*/
+/*Função que extrai o menor custo do HEAP mínimo e já o atualiza. A função também reduz o tamanho do HEAP (número de vértices atuais no
+HEAP). Também é atualizado o vetor de posições do HEAP mínimo, a posição do elemento retirado recebe o tamanho - 1 do HEAP. Dessa forma,
+não é preciso percorrer todo o HEAP para verificar se um elemento existe, apenas é verificada a posição deste.*/
 VerticeCusto extrairMinimo(HeapMinimo *heapMinimo){
 
     VerticeCusto verticeCusto;
@@ -523,7 +532,9 @@ void diminuirValorChave(HeapMinimo *heapMinimo, int i, double chave){
     
 }
 
-/*Função que verifica se existe um vertice no HEAP mínimo.*/
+/*Função que verifica se existe um vertice no HEAP mínimo. Para diminuir a complexidade do algoritmo, em vez de percorrer todo o HEAP
+mínimo para verificar se um vértice pertence a ele, apenas é verificado se a posição do vértice é menor do que o número de vértices 
+atuais no HEAP. Se sim, então ele existe, caso contrário, não existe.*/
 int existe(HeapMinimo *heapMinimo, int vertice){
 
     return (heapMinimo->posicoes[vertice] < heapMinimo->tamanho) ? 1 : 0;
