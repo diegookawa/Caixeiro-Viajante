@@ -215,7 +215,8 @@ void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
 }
 
-/*Função que utiliza o algoritmo de Prim para computar uma árvore geradora mínima.*/
+/*Função que utiliza o algoritmo de Prim para computar uma árvore geradora mínima. Possui um grafo, um vértice raíz e um vetor de pontos
+como entrada. Retorna uma AGM do tipo Grafo *.*/
 Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
     int prodecessores[grafo->vertices];
@@ -370,12 +371,9 @@ void exportarAGM(Grafo *agm, Ponto pontos[]){
 
     }
 
-    for(int i = 0; i < agm->vertices; i++){
-
+    for(int i = 0; i < agm->vertices; i++)
         for(No *aux = agm->adjacencias[i]; aux != NULL; aux = aux->proximo)
             fprintf(arquivo, "%d %d\n%d %d\n", (int) pontos[i].x, (int) pontos[i].y, (int) pontos[aux->id].x, (int) pontos[aux->id].y);
-
-    }
 
     fclose(arquivo);
 
@@ -525,21 +523,21 @@ void diminuirValorChave(HeapMinimo *heapMinimo, int i, double chave){
     
 }
 
-/*Função que verifica se existe um vertice no HEAP mínimo*/
+/*Função que verifica se existe um vertice no HEAP mínimo.*/
 int existe(HeapMinimo *heapMinimo, int vertice){
 
     return (heapMinimo->posicoes[vertice] < heapMinimo->tamanho) ? 1 : 0;
 
 }
 
-/*Função que verifica se o HEAP mínimo está vazio*/
+/*Função que verifica se o HEAP mínimo está vazio.*/
 int vazio(HeapMinimo *heapMinimo){
 
     return (heapMinimo->tamanho <= 0) ? 1 : 0;
 
 }
 
-/*Função para preencher o vetor que indica os vertices visitados*/
+/*Função para preencher o vetor que indica os vertices visitados.*/
 void marcarNaoVisitados(int visitados[], int tam){
 
     for(int i = 0; i < tam; i++)
@@ -547,14 +545,14 @@ void marcarNaoVisitados(int visitados[], int tam){
 
 }
 
-/*Função que imprime o custo total do ciclo*/
+/*Função que imprime o custo total do ciclo.*/
 void imprimirCustoTotal(clock_t inicio, Ponto pontos[], int ciclo[], int tam){
 
     printf("%.6f %.6f\n", (clock() - inicio) / (double)CLOCKS_PER_SEC, calcularCustoTotal(pontos, ciclo, tam));
    
 }
 
-/*Função que libera as estruturas utilizadas pelo programa da memória*/
+/*Função que libera as estruturas utilizadas pelo programa da memória.*/
 void destruirEstruturas(int ciclo[], Ponto pontos[], Grafo *grafo, Grafo *agm){
 
     free(ciclo);
