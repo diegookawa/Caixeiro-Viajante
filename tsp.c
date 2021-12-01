@@ -1,3 +1,14 @@
+/*
+    Disciplina: Projeto e Análise de Algoritmos
+    Turma: S73
+    UTFPR - Curitiba
+
+    Alunos: 
+        Diego Henrique Arenas Okawa - 2127890
+        Louis Brommelstroet - 2127997
+        Ellejeane Camila Marques Ferreira dos Santos - 1904965
+*/
+
 #include <stdlib.h>
 #include <limits.h>
 #include <stdio.h>
@@ -48,11 +59,11 @@ typedef struct ponto {
 
 } Ponto;
 
-/*Funcoes para pontos.*/
+/*Funções para pontos.*/
 
 double calcularDistanciaPontos(Ponto p1, Ponto p2);
 
-/*Funcoes para grafos.*/
+/*Funções para grafos.*/
 
 int *buscaProfundidade(Grafo *agm, int vertice);
 void destruirGrafo(Grafo *grafo);
@@ -70,7 +81,7 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]);
 Grafo *criarGrafo(int tamanho);
 Grafo *preencherGrafo(Ponto pontos[], int tam);
 
-/*Funcoes para HEAP mínimo.*/
+/*Funções para HEAP mínimo.*/
 
 int pai(int i);
 int filhoEsquerda(int i);
@@ -85,8 +96,7 @@ void destruirHeapMinimo(HeapMinimo *heapMinimo);
 VerticeCusto extrairMinimo(HeapMinimo *heapMinimo);
 HeapMinimo *criarHeapMinimo(int tam);
 
-
-/*Programa para encontrar uma aproximação para o problema do Caixeiro Viajante*/
+/*Programa para encontrar uma aproximação para o problema do Caixeiro Viajante.*/
 int main(int argc, char *argv[]){
 
     char *nomeArquivo = (argc > 1) ? argv[1] : "input.txt";
@@ -97,9 +107,9 @@ int main(int argc, char *argv[]){
     
     inicio = clock();
     pontos = lerArquivo(nomeArquivo, &tam);
-    grafo = preencherGrafo(pontos, tam);        //Passo 1. Computar um grafo completo dos pontos, sendo o custo a distancia euclidiana
-    agm = prim(grafo, 0, pontos);               //Passo 2. Computar a Árvore Geradora Mímina
-    ciclo = buscaProfundidade(agm, 0);          //Passo 3. Computar o ciclo usando Busca em Profundidade
+    grafo = preencherGrafo(pontos, tam);        //Passo 1. Computar um grafo completo dos pontos, sendo o custo a distância euclidiana.
+    agm = prim(grafo, 0, pontos);               //Passo 2. Computar a Árvore Geradora Mímina.
+    ciclo = buscaProfundidade(agm, 0);          //Passo 3. Computar o ciclo usando Busca em Profundidade.
 
     exportarAGM(agm, pontos);
     exportarCiclo(ciclo, pontos, tam);
@@ -139,7 +149,7 @@ Ponto *lerArquivo(char nomeArquivo[], int *tam){
 
 }
 
-/*Função para inicializar a estrutura de um grafo*/
+/*Função para inicializar a estrutura de um grafo.*/
 Grafo *criarGrafo(int tamanho){
 
     Grafo *grafo = (Grafo *) malloc (sizeof(Grafo));
@@ -155,7 +165,7 @@ Grafo *criarGrafo(int tamanho){
 
 }
 
-/*Função para criar um grafo com pontos ligados por arestas com peso da distância euclidiana entre eles*/
+/*Função para criar um grafo com pontos ligados por arestas com peso da distância euclidiana entre eles.*/
 Grafo *preencherGrafo(Ponto pontos[], int tam){
 
     Grafo *grafo;
@@ -171,7 +181,7 @@ Grafo *preencherGrafo(Ponto pontos[], int tam){
 
 }
 
-/*Função para liberar um grafo da memória*/
+/*Função para liberar um grafo da memória.*/
 void destruirGrafo(Grafo *grafo){
 
     for(int i = 0; i < grafo->vertices; i++)
@@ -183,7 +193,7 @@ void destruirGrafo(Grafo *grafo){
 
 }
 
-/*Função para adicionar uma aresta entre dois vértices em um grafo*/
+/*Função para adicionar uma aresta entre dois vértices em um grafo.*/
 void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
     No *novo = (No *) malloc (sizeof(No));
@@ -205,7 +215,7 @@ void adicionarAresta(int v1, int v2, double peso, Grafo *grafo){
 
 }
 
-/*Função que utiliza o algoritmo de Prim para computar uma árvore geradora mínima*/
+/*Função que utiliza o algoritmo de Prim para computar uma árvore geradora mínima.*/
 Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
     int prodecessores[grafo->vertices];
@@ -253,7 +263,7 @@ Grafo *prim(Grafo *grafo, int vertice, Ponto pontos[]){
 
 }
 
-/*Função que preenche um heap mínimo para ser usado no algoritmo de Prim*/
+/*Função que inicializa os valores do HEAP mínimo, custos e prodecessores para serem usados no PRIM.*/
 void inicializarPrim(HeapMinimo *heapMinimo, double custos[], int prodecessores[], int tam){
 
     for(int i = 0; i < tam; i++){
@@ -423,7 +433,7 @@ void destruirHeapMinimo(HeapMinimo *heapMinimo){
 
 }
 
-/*Função que atualiza o HEAP mínimo para garantir a árvore*/
+/*Função que atualiza o HEAP mínimo para garantir a árvore.*/
 void atualizarHeapMinimo(HeapMinimo *heapMinimo, int i){
 
     int esquerda = filhoEsquerda(i);
@@ -454,7 +464,7 @@ void atualizarHeapMinimo(HeapMinimo *heapMinimo, int i){
 
 }
 
-/*Função que troca os valores das posições A e B em um HEAP mínimo*/
+/*Função que troca os valores das posições A e B em um HEAP mínimo.*/
 void trocar(HeapMinimo *heapMinimo, int a, int b){
 
     VerticeCusto aux = heapMinimo->valores[a];
@@ -463,7 +473,7 @@ void trocar(HeapMinimo *heapMinimo, int a, int b){
 
 }
 
-/*Função que ordena o HEAP mínimo*/
+/*Função que ordena o HEAP mínimo.*/
 void construirHeapMinimo(HeapMinimo *heapMinimo){
 
     for(int i = 0; i < heapMinimo->tamanho / 2; i++)
@@ -471,7 +481,7 @@ void construirHeapMinimo(HeapMinimo *heapMinimo){
 
 }
 
-/*Função que extrai o menor custo do HEAP mínimo*/
+/*Função que extrai o menor custo do HEAP mínimo.*/
 VerticeCusto extrairMinimo(HeapMinimo *heapMinimo){
 
     VerticeCusto verticeCusto;
@@ -492,7 +502,7 @@ VerticeCusto extrairMinimo(HeapMinimo *heapMinimo){
 
 }
 
-/*Função que diminui o valor de uma chave e reajusta o HEAP mínimo*/
+/*Função que diminui o valor de uma chave e reajusta o HEAP mínimo.*/
 void diminuirValorChave(HeapMinimo *heapMinimo, int i, double chave){
 
     if(chave > heapMinimo->valores[i].custo){
